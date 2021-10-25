@@ -1,11 +1,19 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+//const bodyParser = require('body-parser');
 
 const placesRoutes = require('./routes/places-routes');
 
 const app = express();
 
+app.use(express.json()); // based on body-parser.
+
 app.use('/api/places', placesRoutes); // => /api/places...
+
+
+app.use((req, res, next) => {
+  const error = new HttpError('Could not find this route.', 404);
+  throw error;
+});
 
 app.use((error, req, res, next) => {
   if (res.headerSent) {
