@@ -2,6 +2,7 @@
 const uuid = require('uuid').v4;
 const { validationResult } = require('express-validator');
 
+const Place = require('../models/place');
 const HttpError = require("../models/http-error");
 
 let DUMMY_PLACES = [
@@ -50,7 +51,7 @@ const getPlacesByUserId = (req, res, next) => {
   res.json({ places });
 };
 
-const createPlace = (req, res, next) => {
+const createPlace = async (req, res, next) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -60,17 +61,34 @@ const createPlace = (req, res, next) => {
 
   const { title, description, coordinates, address, creator } = req.body;
   // const title = req.body.title;
-  const createdPlace = {
+  /* const createdPlace = {
     id: uuid(),
     title,
     description,
     location: coordinates,
     address,
     creator
-  };
+  }; */
 
-  DUMMY_PLACES.push(createdPlace); //unshift(createdPlace)
+  const createdPlace = new Place({
+    title,
+    description,
+    address,
+    location: coordinates,
+    image: "https://static1.thetravelimages.com/wordpress/wp-content/uploads/2018/08/china-chinese.fansshare.com_.jpg?q=50&fit=crop&w=740&h=556&dpr=1.5",
+    creator
+  });
 
+  //DUMMY_PLACES.push(createdPlace); //unshift(createdPlace)
+  //console.log(createdPlace, 'createdPlace instance');
+
+  try{
+    await createdPlace.save();
+  }catch(err){
+    const error = new HttpError('Creating place failed, please try again', 500);
+    return next(error);
+  }
+  
   res.status(201).json({ place: createdPlace });
 };
 
