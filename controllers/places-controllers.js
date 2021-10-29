@@ -21,34 +21,45 @@ let DUMMY_PLACES = [
   },
 ];
 
-const getPlaceById = (req, res, next) => {
+const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid; // { pid: 'p1' }
+  //console.log(placeId);
 
-  const place = DUMMY_PLACES.find((p) => {
-    return p.id === placeId;
-  });
-
-  if (!place) {
-    throw new HttpError("Could not find a place for the provided id.", 404);
+  let place;
+  try{
+    place = await Place.findById(placeId);
+  }catch(err){
+    return next (new HttpError ('Something went wrong, could not find a place.', 500));
   }
 
-  res.json({ place }); //{ place: place }
+  if (!place) {
+    return next (new HttpError("Could not find a place for the provided id.", 404));
+  }
+  //console.log(place,'query obj');
+  //console.log(place.toObject({ getters: true }),'converted getter id obj');
+
+//toObject to access the getters //transforming the _id data into id when retrieved from db
+  res.json({ place: place.toObject({ getters: true }) }); // => { place } => { place: place }
 };
 
-const getPlacesByUserId = (req, res, next) => {
+const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
+  console.log(userId, 'creator id');
 
-  const places = DUMMY_PLACES.filter((p) => {
-    return p.creator === userId;
-  });
+  let places;
+  try{
+    places = await Place.find({creator: userId});
+  }catch(err){
+    return next (new HttpError ('Fetching places failed, please try again later',500));
+  }
 
   if (!places || places.length === 0) {//there can be multiple places shared/posted by a single creator/user
     return next(
       new HttpError("Could not find any places for the provided user id.", 404)
     );
-  }
-
-  res.json({ places });
+  };
+  //console.log(places,'places by a particular user with only _id//no the adjusted toObject getters id property rertireved');
+  res.json({ places: places.map(place => place.toObject({ getters: true })) });
 };
 
 const createPlace = async (req, res, next) => {
