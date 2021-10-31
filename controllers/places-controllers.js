@@ -103,36 +103,50 @@ const createPlace = async (req, res, next) => {
   res.status(201).json({ place: createdPlace });
 };
 
-const updatePlace = (req, res, next) => {
-
+const updatePlace = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    throw new HttpError('Invalid inputs passed, please check your data.', 422);
+    return next(new HttpError('Invalid inputs passed, please check your data.', 422));
   }
 
   const { title, description } = req.body;
   const placeId = req.params.pid;
-  console.log(req.params, 'url params');
-  //immutabely updating
-  const place = DUMMY_PLACES.find(p => p.id === placeId) ;
-  const updatedPlace = {...place};
-  console.log(updatedPlace, 'place clone');
-  
-  const placeIndex = DUMMY_PLACES.findIndex(p => p.id === placeId);
-  updatedPlace.title = title;
-  updatedPlace.description = description;
 
-  DUMMY_PLACES[placeIndex] = updatedPlace;
+  let place;
+  try {
+    place = await Place.findById(placeId);
+  } catch (err) {
+    return next(new HttpError('Something went wrong, could not update place.',500));
+  }
 
-  res.status(200).json({place: updatedPlace});
+  place.title = title;
+  place.description = description;
+
+  try {
+    await place.save();
+  } catch (err) {
+    return next(new HttpError('Something went wrong, could not update place.',500));
+  }
+
+  res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
-const deletePlace = (req, res, next) => {
+const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid;
-  if(!DUMMY_PLACES.filter(p => p.id !== placeId)){
-    throw new HttpError("Could not find a place with that ID.", 404)
+
+  let place;
+  try {
+    place = await Place.findById(placeId);
+  } catch (err) {
+    return next(new HttpError('Something went wrong, could not delete place.',500));
+  };
+
+  try {
+    await place.remove();
+  } catch (err) {
+    return next(new HttpError('Something went wrong, could not delete place.',500));
   }
-  DUMMY_PLACES = DUMMY_PLACES.filter(p => p.id !== placeId); //overwriting the original array with newly filtered returned one
+
   res.status(200).json({ message: 'Deleted place.' });
 };
 
