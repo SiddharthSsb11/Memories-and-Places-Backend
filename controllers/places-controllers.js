@@ -1,5 +1,5 @@
 //const { v4: uuidv4 } = require('uuid');
-const uuid = require('uuid').v4;
+//const uuid = require('uuid').v4;
 const { validationResult } = require('express-validator');
 
 const Place = require('../models/place');
@@ -89,9 +89,6 @@ const createPlace = async (req, res, next) => {
     image: "https://static1.thetravelimages.com/wordpress/wp-content/uploads/2018/08/china-chinese.fansshare.com_.jpg?q=50&fit=crop&w=740&h=556&dpr=1.5",
     creator
   });
-
-  //DUMMY_PLACES.push(createdPlace); //unshift(createdPlace)
-  //console.log(createdPlace, 'createdPlace instance');
 
   try{
     await createdPlace.save();
