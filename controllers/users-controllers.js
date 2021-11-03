@@ -29,7 +29,7 @@ const signup = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return next (new HttpError("Invalid inputs passed, please check your data.", 422)) ;
   }
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
 
   let existingUser;
   try{
@@ -47,7 +47,7 @@ const signup = async (req, res, next) => {
     email,
     image: "https://cdn2.hubspot.net/hubfs/1716276/API/celebrities/Bear_Grylls.jpg",
     password,
-    places
+    places: []
   });
 
   try{
@@ -73,7 +73,7 @@ const login = async (req, res, next) => {
   if (!existingUser || existingUser.password !== password) {
     return next(new HttpError('Invalid credentials, could not log you in.',401));
   }
-
+ 
   res.json({message: 'Logged in!'});
 };
 
