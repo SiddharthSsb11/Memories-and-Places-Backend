@@ -7,22 +7,6 @@ const Place = require('../models/place');
 const HttpError = require("../models/http-error");
 const User = require('../models/user');
 
-let DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "Vietnam Jungle",
-    description: 'Dense Asian jungle can be a "dark and forbidding place"',
-    imageUrl:
-      "https://static1.thetravelimages.com/wordpress/wp-content/uploads/2018/08/china-chinese.fansshare.com_.jpg?q=50&fit=crop&w=740&h=556&dpr=1.5",
-    address: "Hamlet 4, Nam Cat Tien, Tan Phu District, Nam Cat Tien Vietnam",
-    location: {
-      lat: 11.752252284264282,
-      lng: 107.46413427724953,
-    },
-    creator: "u1",
-  },
-];
-
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid; // { pid: 'p1' }
   //console.log(placeId);
@@ -46,9 +30,9 @@ const getPlaceById = async (req, res, next) => {
 
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
-  console.log(userId, 'creator id');
+  //console.log(userId, 'creator id');
 
-  let places;
+  /* let places;
   try{
     places = await Place.find({creator: userId});
   }catch(err){
@@ -61,7 +45,32 @@ const getPlacesByUserId = async (req, res, next) => {
     );
   };
   //console.log(places,'places by a particular user with only _id//no the adjusted toObject getters id property rertireved');
-  res.json({ places: places.map(place => place.toObject({ getters: true })) });
+  res.json({ places: places.map(place => place.toObject({ getters: true })) }); */
+
+  let userWithPlaces;
+  try {
+    userWithPlaces = await User.findById(userId).populate('places');
+  } catch (err) {
+    const error = new HttpError(
+      'Fetching places failed, please try again later',
+      500
+    );
+    return next(error);
+  }
+
+  // if (!places || places.length === 0) {
+  if (!userWithPlaces || userWithPlaces.places.length === 0) {
+    return next(
+      new HttpError('Could not find places for the provided user id.', 404)
+    );
+  }
+
+  res.json({
+    places: userWithPlaces.places.map(place =>
+      place.toObject({ getters: true })
+    )
+  });
+
 };
 
 const createPlace = async (req, res, next) => {
@@ -74,14 +83,6 @@ const createPlace = async (req, res, next) => {
 
   const { title, description, coordinates, address, creator } = req.body;
   // const title = req.body.title;
-  /* const createdPlace = {
-    id: uuid(),
-    title,
-    description,
-    location: coordinates,
-    address,
-    creator
-  }; */
 
   const createdPlace = new Place({
     title,
