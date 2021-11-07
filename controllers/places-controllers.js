@@ -51,13 +51,11 @@ const getPlacesByUserId = async (req, res, next) => {
   try {
     userWithPlaces = await User.findById(userId).populate('places');
   } catch (err) {
-    const error = new HttpError(
-      'Fetching places failed, please try again later',
-      500
-    );
-    return next(error);
+    return next(new HttpError('Fetching places failed, please try again later',500));
   }
-
+  /* console.log(userWithPlaces, 'populated');
+  const user = await User.findById(userId)
+  console.log(user, 'user unpopulated') */
   // if (!places || places.length === 0) {
   if (!userWithPlaces || userWithPlaces.places.length === 0) {
     return next(
@@ -65,11 +63,7 @@ const getPlacesByUserId = async (req, res, next) => {
     );
   }
 
-  res.json({
-    places: userWithPlaces.places.map(place =>
-      place.toObject({ getters: true })
-    )
-  });
+  res.json({places: userWithPlaces.places.map(place => place.toObject({ getters: true }))});
 
 };
 

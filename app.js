@@ -10,6 +10,15 @@ const app = express();
 
 app.use(express.json()); // based on body-parser.
 
+//CORS
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+
+  next();
+});
+
 app.use("/api/places", placesRoutes); // => /api/places...
 app.use("/api/users", usersRoutes);
 
@@ -25,8 +34,7 @@ app.use((error, req, res, next) => {
   res.status(error.code || 500);
   res.json({ message: error.message || "An unknown error occurred!" });
 });
-
-mongoose.connect("mongodb+srv://Sid_101:SElfC4XvEVXhWasF@cluster0.oup02.mongodb.net/MemoriesDB?retryWrites=true&w=majority")
+mongoose.connect("mongodb+srv://Sid_101:SElfC4XvEVXhWasF@cluster0.oup02.mongodb.net/MemoriesMernDb?retryWrites=true&w=majority")
   .then(() => {
     app.listen(8000, () => {
       console.log("Connection is UP");
