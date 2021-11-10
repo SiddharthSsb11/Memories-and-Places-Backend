@@ -34,7 +34,7 @@ app.use((error, req, res, next) => {
   res.status(error.code || 500);
   res.json({ message: error.message || "An unknown error occurred!" });
 });
-mongoose.connect("mongodb+srv://Sid_101:SElfC4XvEVXhWasF@cluster0.oup02.mongodb.net/MemoriesMernDb?retryWrites=true&w=majority")
+mongoose.connect("mongodb+srv://Ssb101:memories_mern_pswd@cluster0.b70ax.mongodb.net/mernDB?retryWrites=true&w=majority")
   .then(() => {
     app.listen(8000, () => {
       console.log("Connection is UP");

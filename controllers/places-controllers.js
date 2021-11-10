@@ -75,14 +75,13 @@ const createPlace = async (req, res, next) => {
     return next( new HttpError('Invalid inputs passed, please check your data.', 422));
   }
 
-  const { title, description, coordinates, address, creator } = req.body;
+  const { title, description, address, creator } = req.body;
   // const title = req.body.title;
 
   const createdPlace = new Place({
     title,
     description,
     address,
-    location: coordinates,
     image: "https://static1.thetravelimages.com/wordpress/wp-content/uploads/2018/08/china-chinese.fansshare.com_.jpg?q=50&fit=crop&w=740&h=556&dpr=1.5",
     creator
   });
@@ -107,6 +106,7 @@ const createPlace = async (req, res, next) => {
     user.places.push(createdPlace);
     await user.save({ session: sess });
     await sess.commitTransaction();
+    
   } catch(err){
     //console.log(err)
     return next(new HttpError('Creating place failed, please try again XVXVXV', 500));
