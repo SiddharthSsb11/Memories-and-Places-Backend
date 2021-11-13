@@ -30,8 +30,6 @@ const getPlaceById = async (req, res, next) => {
 
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
-  //console.log(userId, 'creator id');
-
   /* let places;
   try{
     places = await Place.find({creator: userId});
@@ -46,7 +44,6 @@ const getPlacesByUserId = async (req, res, next) => {
   };
   //console.log(places,'places by a particular user with only _id//no the adjusted toObject getters id property rertireved');
   res.json({ places: places.map(place => place.toObject({ getters: true })) }); */
-
   let userWithPlaces;
   try {
     userWithPlaces = await User.findById(userId).populate('places');
@@ -57,10 +54,9 @@ const getPlacesByUserId = async (req, res, next) => {
   const user = await User.findById(userId)
   console.log(user, 'user unpopulated') */
   // if (!places || places.length === 0) {
+
   if (!userWithPlaces || userWithPlaces.places.length === 0) {
-    return next(
-      new HttpError('Could not find places for the provided user id.', 404)
-    );
+    return next(new HttpError('Could not find places for the provided user id.', 404));
   }
 
   res.json({places: userWithPlaces.places.map(place => place.toObject({ getters: true }))});
@@ -106,7 +102,7 @@ const createPlace = async (req, res, next) => {
     user.places.push(createdPlace);
     await user.save({ session: sess });
     await sess.commitTransaction();
-    
+
   } catch(err){
     //console.log(err)
     return next(new HttpError('Creating place failed, please try again XVXVXV', 500));
