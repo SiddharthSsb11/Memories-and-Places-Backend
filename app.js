@@ -1,4 +1,6 @@
 const express = require("express");
+const fs = require('fs');
+const path = require('path');
 //const bodyParser = require('body-parser');
 const mongoose = require("mongoose");
 
@@ -9,6 +11,7 @@ const HttpError = require("./models/http-error");
 const app = express();
 
 app.use(express.json()); // based on body-parser.
+app.use('/uploads/images', express.static(path.join('uploads', 'images')));//serving images statically
 
 //CORS
 app.use((req, res, next) => {
@@ -28,12 +31,20 @@ app.use((req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
+
+  if (req.file) {
+    fs.unlink(req.file.path, err => {
+      console.log(err, 'rolling back the DP signupimage when validation error happens ');
+    });
+  }
+
   if (res.headerSent) {
     return next(error);
   }
   res.status(error.code || 500);
   res.json({ message: error.message || "An unknown error occurred!" });
 });
+ 
 mongoose.connect("mongodb+srv://Ssb101:memories_mern_pswd@cluster0.b70ax.mongodb.net/mernDB?retryWrites=true&w=majority")
   .then(() => {
     app.listen(8000, () => {

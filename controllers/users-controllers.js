@@ -35,10 +35,11 @@ const signup = async (req, res, next) => {
   const createdUser = new User({
     name,
     email,
-    image: "https://cdn2.hubspot.net/hubfs/1716276/API/celebrities/Bear_Grylls.jpg",
+    image: req.file.path,
     password,
     places: []
   });
+  console.log(req.file.path, 'req.file.path be server');
 
   try{
     await createdUser.save();

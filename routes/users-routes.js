@@ -11,7 +11,7 @@ router.get('/', usersController.getUsers);
 
 router.post(
   '/signup',
-  fileUpload.single('image'),
+  fileUpload.single('image'),//image key on the incoming req body
   [
     check('name')
       .not()
