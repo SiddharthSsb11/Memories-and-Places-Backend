@@ -1,5 +1,7 @@
 //const { v4: uuidv4 } = require('uuid');
 //const uuid = require('uuid').v4;
+const fs = require('fs');
+
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 
@@ -78,10 +80,10 @@ const createPlace = async (req, res, next) => {
     title,
     description,
     address,
-    image: "https://static1.thetravelimages.com/wordpress/wp-content/uploads/2018/08/china-chinese.fansshare.com_.jpg?q=50&fit=crop&w=740&h=556&dpr=1.5",
+    image: req.file.path,
     creator
   });
-
+  console.log(req.file.path);
   let user;
   try {
     user = await User.findById(creator); 
@@ -153,6 +155,9 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError('Could not find place for this id.', 404));
   }
 
+  const imagePath = place.image;
+  console.log(imagePath);
+
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -163,6 +168,8 @@ const deletePlace = async (req, res, next) => {
   } catch (err) {
     return next(new HttpError('Something went wrong, could not delete place.',500));
   }
+
+  fs.unlink(imagePath, err => { console.log(err); });
 
   res.status(200).json({ message: 'Deleted place.' });
 };
