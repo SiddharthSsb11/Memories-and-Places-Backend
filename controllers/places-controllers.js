@@ -83,7 +83,7 @@ const createPlace = async (req, res, next) => {
     image: req.file.path,
     creator
   });
-  console.log(req.file.path);
+  //console.log(req.file.path);
   let user;
   try {
     user = await User.findById(creator); 
@@ -95,21 +95,25 @@ const createPlace = async (req, res, next) => {
     return next(new HttpError('Could not find user for provided id', 404));
   }
 
-  //console.log(user);
-  
+  //console.log(user, 'creating user');
+  let sess
   try {
-    const sess = await mongoose.startSession();
+    sess = await mongoose.startSession();
     sess.startTransaction();
     await createdPlace.save({ session: sess });
     user.places.push(createdPlace);
     await user.save({ session: sess });
     await sess.commitTransaction();
-
+    sess.endSession()
+    //console.log(user, 'user session ending line')
   } catch(err){
+    await sess.abortTransaction()
+    sess.endSession()
     //console.log(err)
     return next(new HttpError('Creating place failed, please try again XVXVXV', 500));
   }
-  
+  //console.log(user, 'creating user after after sessionb');
+
   res.status(201).json({ place: createdPlace });
 };
 
@@ -127,6 +131,12 @@ const updatePlace = async (req, res, next) => {
     place = await Place.findById(placeId);
   } catch (err) {
     return next(new HttpError('Something went wrong, could not update place.',500));
+  }
+
+  //console.log(place.creator, 'creator just a field with id as its value; type objectId');
+  if (place.creator.toString() !== req.userData.userId) {//creaotr id is objectId type in db, to compare convert it to string
+    return next(new HttpError('You are not allowed to edit this place.', 401));
+    //authorizing on BE//req.userData.userId passed from protection MW
   }
 
   place.title = title;
@@ -147,6 +157,7 @@ const deletePlace = async (req, res, next) => {
   let place;
   try {
     place = await Place.findById(placeId).populate('creator');
+    //creator not just a field on place doc but now a whole respective user doc/obj
   } catch (err) {
     return next(new HttpError('Something went wrong, could not delete place.',500));
   };
@@ -155,21 +166,31 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError('Could not find place for this id.', 404));
   }
 
-  const imagePath = place.image;
-  console.log(imagePath);
+  //console.log(place, place.creator, 'on deletion place and place.creator');
 
+  if (place.creator.id !== req.userData.userId) {
+    return next(new HttpError('You are not allowed to delete this place.',401));
+  }
+
+  const imagePath = place.image;
+  //console.log(imagePath);
+  let sess
   try {
-    const sess = await mongoose.startSession();
+    sess = await mongoose.startSession();
     sess.startTransaction();
     await place.remove({ session: sess });
     place.creator.places.pull(place);
     await place.creator.save({ session: sess });
     await sess.commitTransaction();
+    sess.endSession();
   } catch (err) {
+    await sess.abortTransaction()
+    sess.endSession()
+    //console.log(err)
     return next(new HttpError('Something went wrong, could not delete place.',500));
   }
 
-  fs.unlink(imagePath, err => { console.log(err); });
+  fs.unlink(imagePath, err => { console.log(err); });//deleting file once the respective place is deleted
 
   res.status(200).json({ message: 'Deleted place.' });
 };
