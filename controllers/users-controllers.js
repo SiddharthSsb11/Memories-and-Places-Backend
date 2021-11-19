@@ -15,6 +15,7 @@ const getUsers = async (req, res, next) => {
   res.json({users: users.map(user => user.toObject({ getters: true }))});
 };
 
+
 const signup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -52,7 +53,7 @@ const signup = async (req, res, next) => {
   try{
     await createdUser.save();
   }catch (err) {
-    return next(new HttpError('Signing up failed XXXXXXXCCCCCCCVVVVVVV, please try again.', 500));
+    return next(new HttpError('Signing up failed XXXXX, please try again.', 500));
   }
 
   let token;
@@ -60,11 +61,19 @@ const signup = async (req, res, next) => {
     token = jwt.sign(
       { userId: createdUser.id, email: createdUser.email },//payload
       'supersecret_dont_share',//secret-key
-      { expiresIn: '1h' }
+      { expiresIn: '23h' }
     );
   } catch (err) {
     return next(new HttpError('Signing up failed, please try again later.',500));
   }
+
+/*   const cookieOptions = {
+    expires: new Date(Date.now() + 23 * 60 * 60 * 1000),
+    httpOnly: true,
+    //secure: true//running https during production mode
+  };
+
+  res.cookie('jwt', token, cookieOptions); */
 
   res.status(201).json({ userId: createdUser.id, email: createdUser.email, token: token });
 };
@@ -100,11 +109,19 @@ const login = async (req, res, next) => {
     token = jwt.sign(
       { userId: existingUser.id, email: existingUser.email },
       'supersecret_dont_share',
-      { expiresIn: '1h' }
+      { expiresIn: '23h' }
     );
   } catch (err) {
     return next(new HttpError('Logging in failed, please try again later.',500));
   }
+
+/*   const cookieOptions = {
+    expires: new Date(Date.now() + 23 * 60 * 60 * 1000),
+    httpOnly: true,
+    //secure: true//running https during production mode
+  };
+
+  res.cookie('jwt', token, cookieOptions); */
  
   res.status(200).json({
     userId: existingUser.id,
@@ -113,6 +130,15 @@ const login = async (req, res, next) => {
   });
 };
 
+/* const logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+  res.status(200).json({ status: 'successfully logged out' });
+};
+ */
 exports.getUsers = getUsers;
 exports.signup = signup;
 exports.login = login;
+/* exports.logout = logout; */

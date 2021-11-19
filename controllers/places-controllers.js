@@ -132,7 +132,8 @@ const updatePlace = async (req, res, next) => {
   } catch (err) {
     return next(new HttpError('Something went wrong, could not update place.',500));
   }
-
+  
+  console.log(req.userData, 'userdata via protecting mw');
   //console.log(place.creator, 'creator just a field with id as its value; type objectId');
   if (place.creator.toString() !== req.userData.userId) {//creaotr id is objectId type in db, to compare convert it to string
     return next(new HttpError('You are not allowed to edit this place.', 401));
