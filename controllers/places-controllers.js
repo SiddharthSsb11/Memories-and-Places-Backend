@@ -73,7 +73,7 @@ const createPlace = async (req, res, next) => {
     return next( new HttpError('Invalid inputs passed, please check your data.', 422));
   }
 
-  const { title, description, address, creator } = req.body;
+  const { title, description, address} = req.body;
   // const title = req.body.title;
 
   const createdPlace = new Place({
@@ -81,12 +81,12 @@ const createPlace = async (req, res, next) => {
     description,
     address,
     image: req.file.path,
-    creator
+    creator: req.userData.userId //protection MW
   });
   //console.log(req.file.path);
   let user;
   try {
-    user = await User.findById(creator); 
+    user = await User.findById(req.userData.userId); 
   } catch (err) {
     return next(new HttpError('Creating place failed, please try again', 500));
   }
@@ -135,6 +135,8 @@ const updatePlace = async (req, res, next) => {
   
   console.log(req.userData, 'userdata via protecting mw');
   //console.log(place.creator, 'creator just a field with id as its value; type objectId');
+  
+  //authorization
   if (place.creator.toString() !== req.userData.userId) {//creaotr id is objectId type in db, to compare convert it to string
     return next(new HttpError('You are not allowed to edit this place.', 401));
     //authorizing on BE//req.userData.userId passed from protection MW

@@ -22,7 +22,7 @@ const checkAuth = (req, res, next) => {
       throw new Error('Authentication failed. You are not Logged IN!');
     }
     // Verification token
-    const decodedTokenPayload = jwt.verify(token, 'supersecret_dont_share');
+    const decodedTokenPayload = jwt.verify(token, process.env.JWT_KEY);
 
     req.userData = { userId: decodedTokenPayload.userId };
     //console.log(req.userData,'req.userData from protection mw decode decodedTokenPayload');
