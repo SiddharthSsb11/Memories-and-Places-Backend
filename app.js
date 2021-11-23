@@ -1,6 +1,6 @@
 const express = require("express");
-const fs = require('fs');
-const path = require('path');
+/* const fs = require('fs');
+const path = require('path'); */
 //const bodyParser = require('body-parser');
 const mongoose = require("mongoose");
 const cookieParser = require('cookie-parser');
@@ -8,13 +8,14 @@ const cookieParser = require('cookie-parser');
 const placesRoutes = require("./routes/places-routes");
 const usersRoutes = require("./routes/users-routes");
 const HttpError = require("./models/http-error");
+const fileDelete = require('./middleware/file-delete');
 
 const app = express();
 
 app.use(express.json()); // based on body-parser.
 app.use(cookieParser());
 
-app.use('/uploads/images', express.static(path.join('uploads', 'images')));//serving images statically
+//app.use('/uploads/images', express.static(path.join('uploads', 'images')));//serving images statically
 
 //CORS
 app.use((req, res, next) => {
@@ -36,14 +37,19 @@ app.use((req, res, next) => {
 app.use((error, req, res, next) => {
 
   if (req.file) {
-    fs.unlink(req.file.path, err => {
+    fileDelete(req.file.location);//location is respective to our aws bucket
+    /* fs.unlink(req.file.path, err => {
       console.log(err, 'rolling back the DP signupimage when validation error happens ');
-    });
+    }); */
   }
 
   if (res.headerSent) {
     return next(error);
   }
+  ///this check is necessary for scenarios where a response header has already been sent but you encounter 
+  //an error while streaming the response to a client 
+  //Then, you forward the error encountered to the default express error handler that will handle it for you 
+  
   res.status(error.code || 500);
   res.json({ message: error.message || "An unknown error occurred!" });
 });

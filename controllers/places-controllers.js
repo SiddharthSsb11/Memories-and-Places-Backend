@@ -1,6 +1,7 @@
 //const { v4: uuidv4 } = require('uuid');
 //const uuid = require('uuid').v4;
 const fs = require('fs');
+// const path = require('path');
 
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
@@ -8,6 +9,7 @@ const mongoose = require('mongoose');
 const Place = require('../models/place');
 const HttpError = require("../models/http-error");
 const User = require('../models/user');
+const fileDelete = require('../middleware/file-delete');
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid; // { pid: 'p1' }
@@ -80,7 +82,7 @@ const createPlace = async (req, res, next) => {
     title,
     description,
     address,
-    image: req.file.path,
+    image: req.file.location,//req.file.path,
     creator: req.userData.userId //protection MW
   });
   //console.log(req.file.path);
@@ -132,6 +134,11 @@ const updatePlace = async (req, res, next) => {
   } catch (err) {
     return next(new HttpError('Something went wrong, could not update place.',500));
   }
+
+/*   console.log('place creator: ', place.creator);
+  console.log('place creator: ', typeof place.creator);
+  console.log('req.userData.userId : ', req.userData.userId);
+  console.log('req.userData.userId : ', typeof req.userData.userId); */
   
   console.log(req.userData, 'userdata via protecting mw');
   //console.log(place.creator, 'creator just a field with id as its value; type objectId');
@@ -161,6 +168,8 @@ const deletePlace = async (req, res, next) => {
   try {
     place = await Place.findById(placeId).populate('creator');
     //creator not just a field on place doc but now a whole respective user doc/obj
+    //allows you to access the related document through the creator property and to 
+    //work within that document as if it was an object
   } catch (err) {
     return next(new HttpError('Something went wrong, could not delete place.',500));
   };
@@ -175,7 +184,7 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError('You are not allowed to delete this place.',401));
   }
 
-  const imagePath = place.image;
+  //const imagePath = place.image;
   //console.log(imagePath);
   let sess
   try {
@@ -193,7 +202,9 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError('Something went wrong, could not delete place.',500));
   }
 
-  fs.unlink(imagePath, err => { console.log(err); });//deleting file once the respective place is deleted
+  const imagePath = place.image;
+  fileDelete(imagePath);
+  //fs.unlink(imagePath, err => { console.log(err); });//deleting file once the respective place is deleted
 
   res.status(200).json({ message: 'Deleted place.' });
 };
