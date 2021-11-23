@@ -44,7 +44,7 @@ const signup = async (req, res, next) => {
   const createdUser = new User({
     name,
     email,
-    image: req.file.path,
+    image: req.file.location,//req.file.path before aws s-3,
     password: hashedPassword,
     places: []
   });
@@ -53,6 +53,7 @@ const signup = async (req, res, next) => {
   try{
     await createdUser.save();
   }catch (err) {
+    console.log(err, err.message)
     return next(new HttpError('Signing up failed XXXXX, please try again.', 500));
   }
 
