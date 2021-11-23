@@ -41,6 +41,7 @@ app.use((error, req, res, next) => {
     /* fs.unlink(req.file.path, err => {
       console.log(err, 'rolling back the DP signupimage when validation error happens ');
     }); */
+    
   }
 
   if (res.headerSent) {
@@ -49,7 +50,7 @@ app.use((error, req, res, next) => {
   ///this check is necessary for scenarios where a response header has already been sent but you encounter 
   //an error while streaming the response to a client 
   //Then, you forward the error encountered to the default express error handler that will handle it for you 
-  
+
   res.status(error.code || 500);
   res.json({ message: error.message || "An unknown error occurred!" });
 });
