@@ -12,7 +12,7 @@ Memories & Places is MERN-CRUD project. See and interact all the places and memo
 
 **Database** MongoDb, Mongoose
 
-This repository contains the server side backend code.
+This repository contains the server side backend code, using nodejs, express, mongodb, mongoose etc.
 
 ## Hosted/Deployed
 
@@ -29,6 +29,16 @@ Working on the Postman API documentation.
 ```bash
 npm install
 ```
+
+## Seed Database
+
+Sample deployed api route
+
+```bash
+https://memories-places.herokuapp.com/api/users
+```
+
+
 
 
 ## Contributing
