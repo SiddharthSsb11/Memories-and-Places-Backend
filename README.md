@@ -16,7 +16,7 @@ This repository contains the server side backend code, using nodejs, express, mo
 
 ## Hosted/Deployed
 
-Hosted the client side frontend ( https://mern11.web.app/ ) and server side backend api(https://memories-places.herokuapp.com/) on separate servers.
+Hosted the client side frontend ( https://mern-memories-places.web.app ) and server side backend api(https://memories-places.herokuapp.com/) on separate servers.
 
 
 ## Project Status
