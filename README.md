@@ -19,13 +19,8 @@ please open an issue first to discuss what you would like to change.
 ## Hosted/Deployed
 
 Hosted the application [Deployed Web-App](https://mern-memories-places.web.app) and the backend  [Heroku-ServerSide](https://memories-places.herokuapp.com/) on separate servers. 
-Backend github repo link for the code [Server-Side](https://github.com/SiddharthSsb11/Memories-and-Places-Backend).
+Backend github repo link for the code [client-Side](https://github.com/SiddharthSsb11/Memories-and-Places-Frontend).
 
-**Sample user login**
-
-| Email | Password  |
-| -------- | --------- |
-| ozil@test.com | oziltest |
 
 ## Features
 
@@ -49,7 +44,7 @@ Backend github repo link for the code [Server-Side](https://github.com/Siddharth
 
 **Database** MongoDb, Mongoose, AWS
 
-This repository contains the client side frontend code made using React.
+This repository contains the server side backend code made using Nodejs, express, mongoose.
 
 
 ## Project Status
@@ -63,15 +58,12 @@ Working on the Postman API documentation.
 npm install
 ```
 
-## Seed Database
 
-Sample deployed api route
+**Sample deployed api route**
 
 ```bash
 https://memories-places.herokuapp.com/api/users
 ```
-
-
 
 
 ## Contributing
