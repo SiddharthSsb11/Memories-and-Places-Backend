@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 const Place = require('../models/place');
 const HttpError = require("../models/http-error");
 const User = require('../models/user');
-const fileDelete = require('../middleware/file-delete');
+const fileDelete = require('../middleware/file-delete');
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid; // { pid: 'p1' }
@@ -60,7 +60,7 @@ const getPlacesByUserId = async (req, res, next) => {
   // if (!places || places.length === 0) {
 
   if (!userWithPlaces || userWithPlaces.places.length === 0) {
-    return next(new HttpError('Could not find places for the provided user id.', 404));
+    return next(new HttpError('Could not find places for the user. Try adding some places first.', 404));
   }
 
   res.json({places: userWithPlaces.places.map(place => place.toObject({ getters: true }))});
@@ -144,7 +144,7 @@ const updatePlace = async (req, res, next) => {
   //console.log(place.creator, 'creator just a field with id as its value; type objectId');
   
   //authorization
-  if (place.creator.toString() !== req.userData.userId) {//creaotr id is objectId type in db, to compare convert it to string
+  if (place.creator.toString() !== req.userData.userId) {//creaotr id is objectId type in db, to compare ;convert it to string
     return next(new HttpError('You are not allowed to edit this place.', 401));
     //authorizing on BE//req.userData.userId passed from protection MW
   }
@@ -202,8 +202,8 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError('Something went wrong, could not delete place.',500));
   }
 
-  const imagePath = place.image;
-  fileDelete(imagePath);
+  const imagePath = place.image;
+  fileDelete(imagePath);
   //fs.unlink(imagePath, err => { console.log(err); });//deleting file once the respective place is deleted
 
   res.status(200).json({ message: 'Deleted place.' });
