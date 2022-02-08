@@ -15,7 +15,7 @@ router.use(checkAuth); //protection MW
 
 router.post(
   "/",
-  fileUpload.single('image'),//same key as formdata identifier
+  fileUpload.single('image'),//same key as formData identifier
   [
     check("title").not().isEmpty(),
     check("description").isLength({ min: 5 }),
@@ -23,6 +23,9 @@ router.post(
   ],
   placesControllers.createPlace
 );
+
+router.put("/like/:pid", placesControllers.likePlace);
+router.put("/unlike/:pid", placesControllers.unlikePlace);
 
 router.patch(
   "/:pid",

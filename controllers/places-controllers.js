@@ -209,8 +209,74 @@ const deletePlace = async (req, res, next) => {
   res.status(200).json({ message: 'Deleted place.' });
 };
 
+// @route    PUT api/place/like/:pid
+// @desc     Like a post
+// @access   Private
+
+const likePlace = async (req, res, next) => {
+  let place
+  try {
+    place = await Place.findById(req.params.pid);
+    
+    // Check if the place has already been liked
+    if (place.likes.some((like) => like.user.toString() === req.user.id)) {
+      //return res.status(400).json({ msg: 'Place already liked' });
+      return next(new HttpError('Place already liked', 400))
+    }
+
+    place.likes.unshift({ user: req.user.id });
+
+    await place.save();
+
+    console.log('place likes array see', place);
+    //return res.json(place.likes);
+    return res.status(200).json({ place: place.toObject({ getters: true }) });
+    
+  } catch (err) {
+    console.error(err.message);
+    //res.status(500).send('Server Error');
+    return next(new HttpError('Something went wrong, could not like the place.',500));
+  }
+};
+
+// @route    PUT api/place/unlike/:id
+// @desc     Unlike a post
+// @access   Private
+
+const unlikePlace = async (req, res, next) => {
+
+  let place
+  try {
+    place = await Place.findById(req.params.pid);
+    
+     // Check if the place has not yet been liked
+    if (!place.likes.some((like) => like.user.toString() === req.user.id)) {
+      return next(new HttpError('Place has not yet been liked', 400));
+    }
+
+    // remove the like
+    place.likes = place.likes.filter( ({ user }) => user.toString() !== req.user.id );
+
+    await place.save();
+
+    console.log('place likes array see', place);
+    //return res.json(place.likes);
+    return res.status(200).json({ place: place.toObject({ getters: true }) });
+    
+  } catch (err) {
+    console.error(err.message);
+    //res.status(500).send('Server Error');
+    return next(new HttpError('Something went wrong, could not unlike the place.',500));
+  }
+
+}
+
+
+
 exports.getPlaceById = getPlaceById;
 exports.getPlacesByUserId = getPlacesByUserId;
 exports.createPlace = createPlace;
 exports.updatePlace = updatePlace;
 exports.deletePlace = deletePlace;
+exports.likePlace = likePlace;
+exports.unlikePlace = unlikePlace;
