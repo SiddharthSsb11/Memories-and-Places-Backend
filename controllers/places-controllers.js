@@ -11,6 +11,23 @@ const HttpError = require("../models/http-error");
 const User = require('../models/user');
 const fileDelete = require('../middleware/file-delete');
 
+
+const getPlaces = async (req, res, next) => {
+  let places;
+
+  try {
+    places = await Place.find({}).populate("creator", "-password");
+    //not including password field while getting user data
+    //.populate("creator", "-password")
+  } catch (err) {
+    return next(new HttpError('Fetching places failed, please try again later.',500));
+  }
+
+  //console.log(places);
+  res.json({places: places.map(place => place.toObject({ getters: true }))});
+};
+
+
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid; // { pid: 'p1' }
   //console.log(placeId);
@@ -170,6 +187,8 @@ const deletePlace = async (req, res, next) => {
     //creator not just a field on place doc but now a whole respective user doc/obj
     //allows you to access the related document through the creator property and to 
     //work within that document as if it was an object
+    console.log(place,'place object to be deleted populated with creator');
+
   } catch (err) {
     return next(new HttpError('Something went wrong, could not delete place.',500));
   };
@@ -272,7 +291,7 @@ const unlikePlace = async (req, res, next) => {
 }
 
 
-
+exports.getPlaces = getPlaces;
 exports.getPlaceById = getPlaceById;
 exports.getPlacesByUserId = getPlacesByUserId;
 exports.createPlace = createPlace;
