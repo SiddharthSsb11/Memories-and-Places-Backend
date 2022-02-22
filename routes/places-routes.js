@@ -26,6 +26,8 @@ router.post(
   placesControllers.createPlace
 );
 
+router.post("/comment/:pid", placesControllers.addComment);
+
 router.put("/like/:pid", placesControllers.likePlace);
 router.put("/unlike/:pid", placesControllers.unlikePlace);
 

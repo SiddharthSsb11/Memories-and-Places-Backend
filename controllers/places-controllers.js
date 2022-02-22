@@ -16,7 +16,8 @@ const getPlaces = async (req, res, next) => {
   let places;
 
   try {
-    places = await Place.find({}).populate("creator", "-password");
+    places = await Place.find({}).sort({ date: -1 }).populate("creator", "-password");
+    //.sort({ date: -1 }) new ones on top 
     //not including password field while getting user data
     //.populate("creator", "-password")
   } catch (err) {
@@ -34,7 +35,7 @@ const getPlaceById = async (req, res, next) => {
 
   let place;
   try{
-    place = await Place.findById(placeId);
+    place = await Place.findById(placeId).populate("creator", "-password");
   }catch(err){
     return next (new HttpError ('Something went wrong, could not find a place.', 500));
   }
@@ -43,7 +44,6 @@ const getPlaceById = async (req, res, next) => {
     return next (new HttpError("Could not find a place for the provided id.", 404));
   }
   //console.log(place,'query obj');
-  //console.log(place.toObject({ getters: true }),'converted getter id obj');
 
 //toObject to access the getters //transforming the _id data into id when retrieved from db
   res.json({ place: place.toObject({ getters: true }) }); // => { place } => { place: place }
@@ -180,14 +180,12 @@ const updatePlace = async (req, res, next) => {
 
 const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid;
-
+  //const doc = await Model.findByIdAndDelete(req.params.id)
   let place;
   try {
     place = await Place.findById(placeId).populate('creator');
-    //creator not just a field on place doc but now a whole respective user doc/obj
-    //allows you to access the related document through the creator property and to 
-    //work within that document as if it was an object
-    console.log(place,'place object to be deleted populated with creator');
+    
+    //console.log(place,'place object to be deleted populated with creator');
 
   } catch (err) {
     return next(new HttpError('Something went wrong, could not delete place.',500));
@@ -198,7 +196,7 @@ const deletePlace = async (req, res, next) => {
   }
 
   //console.log(place, place.creator, 'on deletion place and place.creator');
-
+  //place.creator.id.toString !== req.userData.userId
   if (place.creator.id !== req.userData.userId) {
     return next(new HttpError('You are not allowed to delete this place.',401));
   }
@@ -238,12 +236,12 @@ const likePlace = async (req, res, next) => {
     place = await Place.findById(req.params.pid);
     
     // Check if the place has already been liked
-    if (place.likes.some((like) => like.user.toString() === req.user.id)) {
+    if (place.likes.some((like) => like.user.toString() === req.userData.userId)) {
       //return res.status(400).json({ msg: 'Place already liked' });
       return next(new HttpError('Place already liked', 400))
     }
 
-    place.likes.unshift({ user: req.user.id });
+    place.likes.unshift({ user: req.userData.userId }); //adds it in the beginning
 
     await place.save();
 
@@ -269,12 +267,12 @@ const unlikePlace = async (req, res, next) => {
     place = await Place.findById(req.params.pid);
     
      // Check if the place has not yet been liked
-    if (!place.likes.some((like) => like.user.toString() === req.user.id)) {
+    if (!place.likes.some((like) => like.user.toString() === req.userData.userId)) {
       return next(new HttpError('Place has not yet been liked', 400));
     }
 
     // remove the like
-    place.likes = place.likes.filter( ({ user }) => user.toString() !== req.user.id );
+    place.likes = place.likes.filter( ({ user }) => user.toString() !== req.userData.userId );
 
     await place.save();
 
@@ -290,6 +288,39 @@ const unlikePlace = async (req, res, next) => {
 
 }
 
+// @route   POST api/places/comment/:pid
+// @desc    Add comment to post
+// @access  Private
+const addComment = async(req, res, next) => {
+  
+  let place
+  try{
+    const user = await User.findById(req.userData.userId);
+    place = await Place.findById(req.params.pid);
+    if (!place) {
+      return next(new HttpError('Could not find place for this id.', 404));
+    }
+
+    const newComment = {
+      text: req.body.text,
+      name: user.name,
+      avatar: user.image, //or on fe use logged in user.image as UI avatar src
+      user: req.userData.userId
+    }
+
+    place.comments.unshift(newComment);
+    await place.save();
+    //console.log(place, "comments array check");
+
+    //res.json(place.comments);
+    return res.status(200).json({ place: place.toObject({ getters: true }) });
+
+  }catch(err){
+    console.error(err.message);
+    //res.status(500).send('Server Error');
+    return next(new HttpError('Something went wrong, could not add the comment.',500));
+  }
+}
 
 exports.getPlaces = getPlaces;
 exports.getPlaceById = getPlaceById;
@@ -299,3 +330,4 @@ exports.updatePlace = updatePlace;
 exports.deletePlace = deletePlace;
 exports.likePlace = likePlace;
 exports.unlikePlace = unlikePlace;
+exports.addComment = addComment;
