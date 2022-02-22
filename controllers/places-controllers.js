@@ -265,6 +265,9 @@ const unlikePlace = async (req, res, next) => {
   let place
   try {
     place = await Place.findById(req.params.pid);
+    if (!place) {
+      return next(new HttpError('Could not find place for this id.', 404));
+    }
     
      // Check if the place has not yet been liked
     if (!place.likes.some((like) => like.user.toString() === req.userData.userId)) {
@@ -322,6 +325,49 @@ const addComment = async(req, res, next) => {
   }
 }
 
+// @route   DELETE api/places/comment/:pid/:cid
+// @desc    Remove comment from post
+// @access  Private
+
+const deleteComment = async(req, res, next) => {
+
+  let place;
+  try{
+    place = await Place.findById(req.params.pid);
+    if (!place) {
+      return next(new HttpError('Could not find place for this id.', 404));
+    }
+
+    const comment = place.comments.find(comment => comment.id === req.params.cid);
+    if (!comment) {
+      return next(new HttpError('Could not find comment. Doesnt exist.', 404));
+    }
+
+    if(comment.user.toString() !== req.userData.userId){
+      return next(new HttpError('User not authorized to delete this comment', 401));
+    }
+    console.log(comment, "comment to be deleted");
+
+    // deleting the comment
+    //place.comments = place.comments.filter(({ user }) => user.toString() !== req.userData.userId );//will delete all the users comment 
+    place.comments = place.comments.filter((c) => c._id !==  comment._id );
+    //const commentIndexToBeDeleted = place.comments.map(comment => comment._id.toString()).indexOf(req.params.cid)
+    //place.comments.splice(commentIndexToBeDeleted, 1);
+
+    await place.save();
+
+    console.log('place comments array see', place);
+    //return res.json(place.comments);
+    return res.status(200).json({ place: place.toObject({ getters: true }) });
+
+  }catch(err){
+    console.error(err.message);
+    //res.status(500).send('Server Error');
+    return next(new HttpError('Something went wrong, could not delete the comment.',500));
+  }
+
+}
+
 exports.getPlaces = getPlaces;
 exports.getPlaceById = getPlaceById;
 exports.getPlacesByUserId = getPlacesByUserId;
@@ -331,3 +377,4 @@ exports.deletePlace = deletePlace;
 exports.likePlace = likePlace;
 exports.unlikePlace = unlikePlace;
 exports.addComment = addComment;
+exports.deleteComment = deleteComment;

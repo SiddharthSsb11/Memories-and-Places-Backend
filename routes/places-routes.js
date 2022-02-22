@@ -38,5 +38,6 @@ router.patch(
 );
 
 router.delete("/:pid", placesControllers.deletePlace);
+router.delete("/comment/:pid/:cid", placesControllers.deleteComment);
 
 module.exports = router;
