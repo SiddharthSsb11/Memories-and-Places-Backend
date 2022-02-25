@@ -93,6 +93,8 @@ const signup = async (req, res, next) => {
       token: token,
       image: createdUser.image,
       places: createdUser.places,
+      createdAt: createdUser.createdAt,
+      date: createdUser.date,
     });
 };
 
@@ -156,9 +158,13 @@ const login = async (req, res, next) => {
   console.log("existingUser", existingUser);
   res.status(200).json({
     userId: existingUser.id,
+    name: existingUser.name,
     email: existingUser.email,
     token: token,
+    image: existingUser.image,
+    date: existingUser.date, //existingUser.createdAt
     place: existingUser.places,
+    createdAt: existingUser.createdAt,
   });
 };
 

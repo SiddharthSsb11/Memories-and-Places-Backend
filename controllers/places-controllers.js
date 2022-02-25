@@ -346,7 +346,7 @@ const deleteComment = async(req, res, next) => {
     if(comment.user.toString() !== req.userData.userId){
       return next(new HttpError('User not authorized to delete this comment', 401));
     }
-    console.log(comment, "comment to be deleted");
+    //console.log(comment, "comment to be deleted");
 
     // deleting the comment
     //place.comments = place.comments.filter(({ user }) => user.toString() !== req.userData.userId );//will delete all the users comment 
