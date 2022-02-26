@@ -251,11 +251,11 @@ const likePlace = async (req, res, next) => {
       return next(new HttpError('Place already liked', 400))
     }
 
-    place.likes.unshift({ user: req.userData.userId }); //adds it in the beginning
+    place.likes.unshift({ user: req.userData.userId }); //adds logged in user who liked it, in the beginning
 
     await place.save();
 
-    console.log('place likes array see', place);
+    //console.log('place likes array see', place);
     //return res.json(place.likes);
     return res.status(200).json({ place: place.toObject({ getters: true }) });
     

@@ -155,7 +155,7 @@ const login = async (req, res, next) => {
   };
 
   res.cookie('jwt', token, cookieOptions); */
-  console.log("existingUser", existingUser);
+  //console.log("existingUser", existingUser);
   res.status(200).json({
     userId: existingUser.id,
     name: existingUser.name,

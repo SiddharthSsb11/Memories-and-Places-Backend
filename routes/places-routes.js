@@ -26,11 +26,6 @@ router.post(
   placesControllers.createPlace
 );
 
-router.post("/comment/:pid", placesControllers.addComment);
-
-router.put("/like/:pid", placesControllers.likePlace);
-router.put("/unlike/:pid", placesControllers.unlikePlace);
-
 router.patch(
   "/:pid",
   [check("title").not().isEmpty(), check("description").isLength({ min: 5 })],
@@ -38,6 +33,11 @@ router.patch(
 );
 
 router.delete("/:pid", placesControllers.deletePlace);
+
+router.post("/comment/:pid", placesControllers.addComment);
+
+router.put("/like/:pid", placesControllers.likePlace);
+router.put("/unlike/:pid", placesControllers.unlikePlace);
 router.delete("/comment/:pid/:cid", placesControllers.deleteComment);
 
 module.exports = router;
