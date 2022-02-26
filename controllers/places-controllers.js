@@ -66,8 +66,14 @@ const getPlacesByUserId = async (req, res, next) => {
   //console.log(places,'places by a particular user with only _id//no the adjusted toObject getters id property rertireved');
   res.json({ places: places.map(place => place.toObject({ getters: true })) }); */
   let userWithPlaces;
+  let random
   try {
-    userWithPlaces = await User.findById(userId).populate('places');
+    //userWithPlaces = await User.findById(userId).populate('places');
+    userWithPlaces = await User.findById(userId).populate({
+      path: 'places',
+    // Get friends of friends - populate the 'friends' array for every friend
+    populate: { path: 'creator' }
+    });
   } catch (err) {
     return next(new HttpError('Fetching places failed, please try again later',500));
   }
@@ -80,6 +86,10 @@ const getPlacesByUserId = async (req, res, next) => {
     return next(new HttpError('Could not find places for the user. Try adding some places first.', 404));
   }
 
+  //const userPlaces = userWithPlaces.places.map(place => place.toObject({ getters: true }));
+  //console.log(userPlaces);
+  //console.log(random);
+  //res.json({places: userWithPlaces.places.map(place => place.toObject({ getters: true })), creator:userWithPlaces});
   res.json({places: userWithPlaces.places.map(place => place.toObject({ getters: true }))});
 
 };
