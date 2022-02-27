@@ -51,47 +51,29 @@ const getPlaceById = async (req, res, next) => {
 
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
-  /* let places;
-  try{
-    places = await Place.find({creator: userId});
-  }catch(err){
-    return next (new HttpError ('Fetching places failed, please try again later',500));
-  }
-
-  if (!places || places.length === 0) {//there can be multiple places shared/posted by a single creator/user
-    return next(
-      new HttpError("Could not find any places for the provided user id.", 404)
-    );
-  };
-  //console.log(places,'places by a particular user with only _id//no the adjusted toObject getters id property rertireved');
-  res.json({ places: places.map(place => place.toObject({ getters: true })) }); */
   let userWithPlaces;
-  let random
+  //let random
   try {
     //userWithPlaces = await User.findById(userId).populate('places');
     userWithPlaces = await User.findById(userId).populate({
       path: 'places',
-    // Get friends of friends - populate the 'friends' array for every friend
-    populate: { path: 'creator' }
+      populate: { path: 'creator' }
     });
   } catch (err) {
     return next(new HttpError('Fetching places failed, please try again later',500));
   }
-  /* console.log(userWithPlaces, 'populated');
-  const user = await User.findById(userId)
-  console.log(user, 'user unpopulated') */
-  // if (!places || places.length === 0) {
+
 
   if (!userWithPlaces || userWithPlaces.places.length === 0) {
     return next(new HttpError('Could not find places for the user. Try adding some places first.', 404));
   }
-
   //const userPlaces = userWithPlaces.places.map(place => place.toObject({ getters: true }));
   //console.log(userPlaces);
   //console.log(random);
   //res.json({places: userWithPlaces.places.map(place => place.toObject({ getters: true })), creator:userWithPlaces});
+  //console.log(userWithPlaces)
   res.json({places: userWithPlaces.places.map(place => place.toObject({ getters: true }))});
-
+  //res.json({places: userWithPlaces.places});
 };
 
 const createPlace = async (req, res, next) => {
@@ -260,7 +242,7 @@ const likePlace = async (req, res, next) => {
     return res.status(200).json({ place: place.toObject({ getters: true }) });
     
   } catch (err) {
-    console.error(err.message);
+    //console.error(err.message);
     //res.status(500).send('Server Error');
     return next(new HttpError('Something went wrong, could not like the place.',500));
   }
